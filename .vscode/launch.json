@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "pwa-node",
+      "request": "attach",
+      "name": "API-SERVICE",
+      "address": "localhost",
+      "port": 9229,
+      "localRoot": "${workspaceFolder}/rlcc-assistant-api-service",
+      "remoteRoot": "/rlcc-assistant-api-service",
+      "restart": true,
+      "protocol": "inspector",
+      "skipFiles": ["<node_internals>/**", "node_modules/**"]
+    }
+  ]
+}

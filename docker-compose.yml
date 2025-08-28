@@ -1,0 +1,64 @@
+volumes:
+  mysql_data:
+  redis-data:
+services:
+  # rlcc-assistant-db-service:
+  #   image: mysql
+  #   build: ./rlcc-assistant-db-service
+  #   container_name: rlcc-assistant-db-service
+  #   restart: always
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: rootpassword
+  #     MYSQL_DATABASE: sampledb
+  #     MYSQL_USER: user
+  #     MYSQL_PASSWORD: userpassword
+  #   ports:
+  #     - "3307:3306"
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+
+  rlcc-assistant-api-service:
+    image: node
+    build: ./rlcc-assistant-api-service
+    container_name: rlcc-assistant-api-service
+    # depends_on:
+    #   - rlcc-assistant-db-service
+
+    ports:
+      - "3000:3000"
+      - "9229:9229"
+
+    command: sh -c "npx sequelize-cli db:create && npx sequelize-cli db:migrate && npm run dev"
+
+    # command: sh -c "npx sequelize-cli db:migrate && chmod +x ./wait.sh && ./wait.sh rlcc-assistant-db-service:3306 && npm run dev"
+
+    volumes:
+      - ./rlcc-assistant-api-service/src:/rlcc-assistant-api-service/src # Mount your code
+      - /rlcc-assistant-api-service/node_modules # Prevent host from overwriting container node_modules
+    environment:
+      DB_HOST: rlcc-assistant-db-service
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+      DB_NAME: sampledb
+
+  # rlcc-assistant-redis-service:
+  #   image: redis:latest
+  #   container_name: rlcc-assistant-redis-service
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis-data:/data
+  #   command:
+  #     [
+  #       "redis-server",
+  #       "--appendonly",
+  #       "yes",
+  #       "--requirepass",
+  #       "yourStrongPassword",
+  #     ]
+  # rlcc-assistant-client:
+  #   build: ./rlcc-assistant-client
+  #   container_name: rlcc-assistant-client
+  #   ports:
+  #     - "8080:80"
