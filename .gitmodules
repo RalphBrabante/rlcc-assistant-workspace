@@ -1,0 +1,3 @@
+[submodule "rlcc-assistant-api-service"]
+	path = rlcc-assistant-api-service
+	url = git@github.com:RalphBrabante/rlcc-assistant-api-service.git
