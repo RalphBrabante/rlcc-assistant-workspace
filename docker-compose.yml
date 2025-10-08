@@ -42,6 +42,8 @@ services:
       DB_USER: root
       DB_PASSWORD: rootpassword
       DB_NAME: sampledb
+    env_file:
+      - ./rlcc-assistant-api-service/.env
   rlcc-assistant-amqp-service:
     image: rabbitmq:3-management
     container_name: rlcc-assistant-amqp-service
