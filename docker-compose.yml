@@ -37,7 +37,6 @@ services:
 
     volumes:
       - ./rlcc-assistant-api-service/src:/rlcc-assistant-api-service/src # Mount your code
-      - /rlcc-assistant-api-service/node_modules # Prevent host from overwriting container node_modules
     environment:
       HOST: 0.0.0.0
       PORT: 3000
