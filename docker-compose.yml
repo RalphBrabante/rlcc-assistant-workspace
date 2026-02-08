@@ -31,7 +31,7 @@ services:
       - "3000:3000"
       - "9229:9229"
 
-    command: sh -c "npx sequelize-cli db:create && npx sequelize-cli db:migrate && npm run dev"
+    command: sh -c "npm run dev:boot"
 
     # command: sh -c "npx sequelize-cli db:migrate && chmod +x ./wait.sh && ./wait.sh rlcc-assistant-db-service:3306 && npm run dev"
 
