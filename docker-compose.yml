@@ -2,6 +2,7 @@ volumes:
   mysql_data:
   redis-data:
   rabbitmq_data:
+  rlcc_assistant_client_node_modules:
 services:
   # rlcc-assistant-db-service:
   #   image: mysql
@@ -22,8 +23,9 @@ services:
     image: node
     build: ./rlcc-assistant-api-service
     container_name: rlcc-assistant-api-service
-    # depends_on:
-    #   - rlcc-assistant-db-service
+    depends_on:
+      - rlcc-assistant-amqp-service
+      - rlcc-assistant-redis-service
 
     ports:
       - "3000:3000"
@@ -37,6 +39,13 @@ services:
       - ./rlcc-assistant-api-service/src:/rlcc-assistant-api-service/src # Mount your code
       - /rlcc-assistant-api-service/node_modules # Prevent host from overwriting container node_modules
     environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      REDIS_ENABLED: "true"
+      REDIS_HOST: rlcc-assistant-redis-service
+      REDIS_PORT: 6379
+      CACHE_TTL_SECONDS: 120
+      CORS_ALLOWED_ORIGINS: http://localhost,http://localhost:80,http://localhost:4200,http://127.0.0.1,http://127.0.0.1:80,http://127.0.0.1:4200
       DB_HOST: rlcc-assistant-db-service
       DB_PORT: 3306
       DB_USER: root
@@ -56,23 +65,35 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
-  # rlcc-assistant-redis-service:
-  #   image: redis:latest
-  #   container_name: rlcc-assistant-redis-service
-  #   ports:
-  #     - "6379:6379"
-  #   volumes:
-  #     - redis-data:/data
-  #   command:
-  #     [
-  #       "redis-server",
-  #       "--appendonly",
-  #       "yes",
-  #       "--requirepass",
-  #       "yourStrongPassword",
-  #     ]
-  # rlcc-assistant-client:
-  #   build: ./rlcc-assistant-client
-  #   container_name: rlcc-assistant-client
-  #   ports:
-  #     - "8080:80"
+  rlcc-assistant-client:
+    build:
+      context: ./rlcc-assistant-client
+      dockerfile: Dockerfile.dev
+    container_name: rlcc-assistant-client
+    working_dir: /rlcc-assistant-client
+    command: sh -c "npm run start -- --host 0.0.0.0 --port 4200 --poll 1000"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ./rlcc-assistant-client:/rlcc-assistant-client
+      - rlcc_assistant_client_node_modules:/rlcc-assistant-client/node_modules
+
+  rlcc-assistant-nginx:
+    image: nginx:alpine
+    container_name: rlcc-assistant-nginx
+    depends_on:
+      - rlcc-assistant-client
+      - rlcc-assistant-api-service
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+  rlcc-assistant-redis-service:
+    image: redis:7-alpine
+    container_name: rlcc-assistant-redis-service
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
