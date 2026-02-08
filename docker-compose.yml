@@ -70,7 +70,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: rlcc-assistant-client
     working_dir: /rlcc-assistant-client
-    command: sh -c "npm run start -- --host 0.0.0.0 --port 4200 --poll 1000"
+    command: sh -c "npm ls --depth=0 >/dev/null 2>&1 || npm install --legacy-peer-deps --no-audit --no-fund; npm run start -- --host 0.0.0.0 --port 4200 --poll 1000"
     environment:
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
