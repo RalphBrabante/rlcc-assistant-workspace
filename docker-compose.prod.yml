@@ -11,10 +11,8 @@ services:
     working_dir: /rlcc-assistant-api-service
     restart: unless-stopped
     depends_on:
-      rlcc-assistant-amqp-service:
-        condition: service_healthy
-      rlcc-assistant-redis-service:
-        condition: service_healthy
+      - rlcc-assistant-amqp-service
+      - rlcc-assistant-redis-service
     command: sh -c "cd /rlcc-assistant-api-service && npm run start:boot"
     environment:
       NODE_ENV: production
