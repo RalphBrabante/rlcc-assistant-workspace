@@ -11,8 +11,10 @@ services:
     working_dir: /rlcc-assistant-api-service
     restart: unless-stopped
     depends_on:
-      - rlcc-assistant-amqp-service
-      - rlcc-assistant-redis-service
+      rlcc-assistant-amqp-service:
+        condition: service_healthy
+      rlcc-assistant-redis-service:
+        condition: service_healthy
     command: sh -c "cd /rlcc-assistant-api-service && npm run start:boot"
     environment:
       NODE_ENV: production
@@ -82,6 +84,12 @@ services:
       RABBITMQ_DEFAULT_PASS: admin
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     cpus: 0.15
     mem_limit: 180m
     logging:
@@ -97,6 +105,12 @@ services:
     command: redis-server --save "" --appendonly no --maxmemory 96mb --maxmemory-policy allkeys-lru
     volumes:
       - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     cpus: 0.15
     mem_limit: 120m
     logging:
