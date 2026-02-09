@@ -8,6 +8,7 @@ services:
       context: ./rlcc-assistant-api-service
       dockerfile: Dockerfile.prod
     container_name: rlcc-assistant-api-service
+    working_dir: /rlcc-assistant-api-service
     restart: unless-stopped
     depends_on:
       - rlcc-assistant-amqp-service
